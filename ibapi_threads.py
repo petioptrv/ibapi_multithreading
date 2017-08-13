@@ -1,4 +1,4 @@
-from ibapi import wrapper
+from ibapi.wrapper import EWrapper
 from ibapi.client import EClient
 from ibapi.contract import *
 
@@ -6,9 +6,9 @@ import threading
 
 
 # Create your app class
-class TestApp(wrapper.EWrapper, EClient):
+class TestApp(EWrapper, EClient):
     def __init__(self):
-        wrapper.EWrapper.__init__(self)
+        EWrapper.__init__(self)
         EClient.__init__(self, wrapper=self)
         
         # CONNECTION OPTIONS
