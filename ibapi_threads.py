@@ -2,6 +2,8 @@ from ibapi.wrapper import EWrapper
 from ibapi.client import EClient
 from ibapi.contract import Contract
 from ibapi.order import Order
+from ibapi.ticktype import *
+from ibapi.common import *
 
 import threading
 import time
@@ -27,6 +29,11 @@ class IBApp(EWrapper, EClient):
 
         self.connect(self.ip_address, self.socket_port, clientId=self.client_id)  # Connect to server
         print(f"serverVersion:{self.serverVersion()} connectionTime:{self.twsConnectionTime()}\n")  # Check connection
+        
+        # Request frozen market data in case live is not available.
+        # Different market data subscriptions give you access to different information
+        # https://interactivebrokers.github.io/tws-api/market_data_type.html#gsc.tab=0
+        self.reqMarketDataType(4)
 
     # WRAPPER OVERRIDEN METHODS
 
@@ -42,6 +49,12 @@ class IBApp(EWrapper, EClient):
 
         self.account = accountsList.split(',')[0]  # Get the first item of the comma-delimited list
 
+    def tickPrice(self, reqId:TickerId , tickType:TickType, price:float,
+                  attrib:TickAttrib):
+        """Market data tick price callback. Handles all price related ticks."""
+
+        print('Tick price received: type {}, price {}'.format(tickType, price))  # Print information to screen
+
     # OTHER METHODS
 
     def loop(self):
@@ -53,7 +66,7 @@ class IBApp(EWrapper, EClient):
         time.sleep(2)
 
         while True:
-            usr_in = input('What do? (o for order, d for data:')  # Collect user input
+            usr_in = input('What do? (o for order, d for data):')  # Collect user input
             if usr_in == 'o':
                 contract = self.create_contract('TSLA')  # Create a contract
                 order = self.create_order('BUY', 5)  # Create an order
